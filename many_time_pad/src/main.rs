@@ -11,11 +11,7 @@ Hint: XOR the ciphertexts together, and consider what happens when a space is XO
 Answer: When a space is XORed with a char, you get ...
 
 Assumptions: 
-1. Only regular chars, from ' ' to '~': hex 20 - 7E
-2. For " ", the first 2 bits of space_XOR_char will ALWAYS be '01'
-    Hex " " = 00100000
-    Hex "A-z" = 01000001 - 01111010
-    " " XOR "A-z" = 01??????
+" " XOR A-Z, then >=65
 
 Strategies: 
 1. For every c, XOR with other c's, dedupe for chars that consistently begin with '01'
@@ -27,10 +23,10 @@ Strategies:
 
 extern crate hex;  // Crate: encodes values into a Vec<u8>
 use hex::*;
+use std::collections::HashMap;
 
 // Set up, target string is [0]
-const ciphers_strings: [&str; 11] = [
-    "32510ba9babebbbefd001547a810e67149caee11d945cd7fc81a05e9f85aac650e9052ba6a8cd8257bf14d13e6f0a803b54fde9e77472dbff89d71b57bddef121336cb85ccb8f3315f4b52e301d16e9f52f904",
+const ciphers_strings: [&str; 10] = [
     "315c4eeaa8b5f8aaf9174145bf43e1784b8fa00dc71d885a804e5ee9fa40b16349c146fb778cdf2d3aff021dfff5b403b510d0d0455468aeb98622b137dae857553ccd8883a7bc37520e06e515d22c954eba5025b8cc57ee59418ce7dc6bc41556bdb36bbca3e8774301fbcaa3b83b220809560987815f65286764703de0f3d524400a19b159610b11ef3e",
     "234c02ecbbfbafa3ed18510abd11fa724fcda2018a1a8342cf064bbde548b12b07df44ba7191d9606ef4081ffde5ad46a5069d9f7f543bedb9c861bf29c7e205132eda9382b0bc2c5c4b45f919cf3a9f1cb74151f6d551f4480c82b2cb24cc5b028aa76eb7b4ab24171ab3cdadb8356f",
     "32510ba9a7b2bba9b8005d43a304b5714cc0bb0c8a34884dd91304b8ad40b62b07df44ba6e9d8a2368e51d04e0e7b207b70b9b8261112bacb6c866a232dfe257527dc29398f5f3251a0d47e503c66e935de81230b59b7afb5f41afa8d661cb",
@@ -43,25 +39,40 @@ const ciphers_strings: [&str; 11] = [
     "466d06ece998b7a2fb1d464fed2ced7641ddaa3cc31c9941cf110abbf409ed39598005b3399ccfafb61d0315fca0a314be138a9f32503bedac8067f03adbf3575c3b8edc9ba7f537530541ab0f9f3cd04ff50d66f1d559ba520e89a2cb2a83"
 ];
 
+// 83 chars
+const message_string: &str = "32510ba9babebbbefd001547a810e67149caee11d945cd7fc81a05e9f85aac650e9052ba6a8cd8257bf14d13e6f0a803b54fde9e77472dbff89d71b57bddef121336cb85ccb8f3315f4b52e301d16e9f52f904";
+
 fn main() {
     // converts strings into hex
     let mut ciphers: Vec<Vec<u8>> = ciphers_strings.into_iter().map( |x| Vec::from_hex(x).unwrap() ).collect();
+    let mut message: Vec<u8> = Vec::from_hex(message_string).unwrap();
 
-    // converts hex into binary (easier to work with)
+    let mut XOR_vector: Vec<Vec<u8>> = Vec::new();
     
-}
+    for i in 0..10 {
+        ciphers[i].truncate(message.len()); // truncate cipher to same length as message
+        let cipher_xor_message: Vec<u8> = ciphers[i].iter().zip(&message).map(|(x1, x2)| x1 ^ x2).collect();
+        XOR_vector.push(cipher_xor_message);
+    }
+    
+                            // position
+    let mut possible_chars: HashMap<usize, char> = HashMap::new();
 
-// checks the 2 most significant bits of a u8 char, returns true only if 0 < 1
-fn msb01(c: u8) -> bool {
-    (c >> 7 & 1) < (c >> 6 & 1)  
-}
+    // iterate through XOR_vector 
+    for i in 0..10 {
+        for j in 0..message.len() {     // char position
+            if XOR_vector[i][j] >= 65 { // then it's either space or a char at pos j
+                let c = char::from(32 ^ XOR_vector[i][j]); // possible char contender
+                if ! possible_chars.contains_key(&j) { possible_chars.insert(j, c); }
+                // already exists
+                else {
+                    // if its a new char, then this position is a space 
+                    if possible_chars[&j] != c { possible_chars.insert(j, ' '); }
+                    else { possible_chars.insert(j, c); }
+                } 
+            }
+        }
+    }
 
-
-#[test]
-fn test_msb_works() {
-    assert_eq!(msb01(77), true);    // Bin: 010001100
-    assert_eq!(msb01(127), true);    // Bin: 01111111
-    assert_eq!(msb01(128), false);  // Bin: 10000000
-    assert_eq!(msb01(10), false);   // Bin: 00001010
-    assert_eq!(msb01(219), false);   // Bin: 11011011
+    print!("\n\n Message is: {:?}", possible_chars);
 }
