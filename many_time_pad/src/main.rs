@@ -56,23 +56,23 @@ fn main() {
     }
     
                             // position
-    let mut possible_chars: HashMap<usize, char> = HashMap::new();
+    // let mut possible_chars: HashMap<usize, char> = HashMap::new();
+    let mut possible_message: Vec<char> = vec!['-'; message.len()];
 
     // iterate through XOR_vector 
     for i in 0..10 {
         for j in 0..message.len() {     // char position
             if XOR_vector[i][j] >= 65 { // then it's either space or a char at pos j
                 let c = char::from(32 ^ XOR_vector[i][j]); // possible char contender
-                if ! possible_chars.contains_key(&j) { possible_chars.insert(j, c); }
-                // already exists
-                else {
-                    // if its a new char, then this position is a space 
-                    if possible_chars[&j] != c { possible_chars.insert(j, ' '); }
-                    else { possible_chars.insert(j, c); }
-                } 
+
+                // if space isn't occupied yet, replace with c
+                if possible_message[j] == '-' { possible_message[j] = c; }
+                else if c != possible_message[j] { possible_message[j] = ' '; }
+                // if new char a different char, replace with space
+                // else { possible_message[i] = ' '; }
             }
         }
     }
 
-    print!("\n\n Message is: {:?}", possible_chars);
+    print!("\n\n Message is: {:?}", possible_message);
 }
