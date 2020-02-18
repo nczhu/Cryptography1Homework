@@ -9,14 +9,28 @@ Your goal is to decrypt the last ciphertext, and submit the secret message withi
 Hint: XOR the ciphertexts together, and consider what happens when a space is XORed with a character in [a-zA-Z].
 
 Answer: When a space is XORed with a char, you get ...
+
+Assumptions: 
+1. Only regular chars, from ' ' to '~': hex 20 - 7E
+2. For " ", the first 2 bits of space_XOR_char will ALWAYS be '01'
+    Hex " " = 00100000
+    Hex "A-z" = 01000001 - 01111010
+    " " XOR "A-z" = 01??????
+
+Strategies: 
+1. For every c, XOR with other c's, dedupe for chars that consistently begin with '01'
+2. Replace those chars with spaces
+3. For every c, XOR with spaces, those are the other chars
+4. Substitute sentence with new found chars
 */
 
 
 extern crate hex;  // Crate: encodes values into a Vec<u8>
 use hex::*;
 
-// Set up
-const ciphers_strings: [&str; 10] = [
+// Set up, target string is [0]
+const ciphers_strings: [&str; 11] = [
+    "32510ba9babebbbefd001547a810e67149caee11d945cd7fc81a05e9f85aac650e9052ba6a8cd8257bf14d13e6f0a803b54fde9e77472dbff89d71b57bddef121336cb85ccb8f3315f4b52e301d16e9f52f904",
     "315c4eeaa8b5f8aaf9174145bf43e1784b8fa00dc71d885a804e5ee9fa40b16349c146fb778cdf2d3aff021dfff5b403b510d0d0455468aeb98622b137dae857553ccd8883a7bc37520e06e515d22c954eba5025b8cc57ee59418ce7dc6bc41556bdb36bbca3e8774301fbcaa3b83b220809560987815f65286764703de0f3d524400a19b159610b11ef3e",
     "234c02ecbbfbafa3ed18510abd11fa724fcda2018a1a8342cf064bbde548b12b07df44ba7191d9606ef4081ffde5ad46a5069d9f7f543bedb9c861bf29c7e205132eda9382b0bc2c5c4b45f919cf3a9f1cb74151f6d551f4480c82b2cb24cc5b028aa76eb7b4ab24171ab3cdadb8356f",
     "32510ba9a7b2bba9b8005d43a304b5714cc0bb0c8a34884dd91304b8ad40b62b07df44ba6e9d8a2368e51d04e0e7b207b70b9b8261112bacb6c866a232dfe257527dc29398f5f3251a0d47e503c66e935de81230b59b7afb5f41afa8d661cb",
@@ -28,8 +42,6 @@ const ciphers_strings: [&str; 10] = [
     "271946f9bbb2aeadec111841a81abc300ecaa01bd8069d5cc91005e9fe4aad6e04d513e96d99de2569bc5e50eeeca709b50a8a987f4264edb6896fb537d0a716132ddc938fb0f836480e06ed0fcd6e9759f40462f9cf57f4564186a2c1778f1543efa270bda5e933421cbe88a4a52222190f471e9bd15f652b653b7071aec59a2705081ffe72651d08f822c9ed6d76e48b63ab15d0208573a7eef027",
     "466d06ece998b7a2fb1d464fed2ced7641ddaa3cc31c9941cf110abbf409ed39598005b3399ccfafb61d0315fca0a314be138a9f32503bedac8067f03adbf3575c3b8edc9ba7f537530541ab0f9f3cd04ff50d66f1d559ba520e89a2cb2a83"
 ];
-
-const target: &str = "32510ba9babebbbefd001547a810e67149caee11d945cd7fc81a05e9f85aac650e9052ba6a8cd8257bf14d13e6f0a803b54fde9e77472dbff89d71b57bddef121336cb85ccb8f3315f4b52e301d16e9f52f904";
 
 fn main() {
     let mut ciphers: Vec<Vec<u8>> = ciphers_strings.into_iter().map( |x| Vec::from_hex(x).unwrap() ).collect();
