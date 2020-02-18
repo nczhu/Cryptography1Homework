@@ -45,6 +45,7 @@ const message_string: &str = "32510ba9babebbbefd001547a810e67149caee11d945cd7fc8
 const len: usize = 83; // hacky but makes hacking easier
 
 fn main() {
+    // Step 1
     // converts strings into hex
     let mut ciphers: Vec<Vec<u8>> = ciphers_strings.into_iter().map( |x| Vec::from_hex(x).unwrap() ).collect();
     let message: Vec<u8> = Vec::from_hex(message_string).unwrap();
@@ -61,6 +62,7 @@ fn main() {
     // let mut possible_chars: HashMap<usize, char> = HashMap::new();
     let mut possible_message: Vec<char> = vec!['-'; len];
 
+    // Step 2
     // iterate through xor_vector 
     for i in 0..ciphers.len() {
         for j in 0..len {     // char position
@@ -73,8 +75,8 @@ fn main() {
         }
     }
 
-    // Guessing the key to solve other puzzles to get the first one 100 % accurately
 
+    // Step 3
     // print!("\n\n Message is: {:?}", possible_message);
     let m0: Vec<u8> = "The secret message is  When using a stream cipher, never use the key more than once".chars().map( |x| x as u8 ).collect(); 
     let key: Vec<u8> = message.iter().zip(&m0).map(|(x1, x2)| x1 ^ x2).collect(); 
@@ -85,7 +87,7 @@ fn main() {
         // println!("{:?}\n", phrase);
     }
 
-    // another iteration: 
+    // Step 4
     let c1: Vec<u8> = "The ciphertext produced by a weak encryption algorithm looks as good as ciphertext ".chars().map( |x| x as u8 ).collect(); 
     let key: Vec<u8> = ciphers[3].iter().zip(&c1).map(|(x1, x2)| x1 ^ x2).collect(); 
 
