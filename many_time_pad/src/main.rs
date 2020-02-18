@@ -13,11 +13,11 @@ Answer: When a space is XORed with a char, you get ...
 Assumptions: 
 " " XOR A-Z, then >=65
 
-Strategies: 
-1. For every c, XOR with other c's, dedupe for chars that consistently begin with '01'
-2. Replace those chars with spaces
-3. For every c, XOR with spaces, those are the other chars
-4. Substitute sentence with new found chars
+Strategies when solving for m0: 
+1. For every c including c0 for m0, XOR with other c's, flag on products that are >=65
+2. Replace those chars with ' ' OR ' 'xorHEX. If multiple chars compete for that slot in m0, then its more likely to be a ' '
+3. Get the best guess for key for m0, use it to decrypt other c's
+4. Choose the best decrypted message from the set, generate better keys, rinse and repeat.  
 */
 
 
