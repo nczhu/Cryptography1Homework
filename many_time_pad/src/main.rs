@@ -44,5 +44,24 @@ const ciphers_strings: [&str; 11] = [
 ];
 
 fn main() {
+    // converts strings into hex
     let mut ciphers: Vec<Vec<u8>> = ciphers_strings.into_iter().map( |x| Vec::from_hex(x).unwrap() ).collect();
+
+    // converts hex into binary (easier to work with)
+    
+}
+
+// checks the 2 most significant bits of a u8 char, returns true only if 0 < 1
+fn msb01(c: u8) -> bool {
+    (c >> 7 & 1) < (c >> 6 & 1)  
+}
+
+
+#[test]
+fn test_msb_works() {
+    assert_eq!(msb01(77), true);    // Bin: 010001100
+    assert_eq!(msb01(127), true);    // Bin: 01111111
+    assert_eq!(msb01(128), false);  // Bin: 10000000
+    assert_eq!(msb01(10), false);   // Bin: 00001010
+    assert_eq!(msb01(219), false);   // Bin: 11011011
 }
