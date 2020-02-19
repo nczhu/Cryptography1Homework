@@ -98,7 +98,21 @@ fn main() {
 
     let final_phrase: Vec<char> = message.iter().zip(&key).map(|(x1, x2)| (x1 ^ x2) as char).collect(); 
     println!("{:?}\n", final_phrase);
+
+    let dawn: Vec<u8> = "attack at dawn".chars().map( |x| x as u8 ).collect();
+    let s: &str = "6c73d5240a948c86981bc294814d";
+    let dawn_encrypted: Vec<u8>= Vec::from_hex(s).unwrap();
+
+    let dusk: Vec<u8> = "attack at dusk".chars().map( |x| x as u8 ).collect(); 
     
+
+    let key: Vec<u8> = dawn.iter().zip(&dawn_encrypted).map(|(x1, x2)|  (x1 ^ x2) ).collect();
+
+    let answer: Vec<u8> = dusk.iter().zip(&key).map(|(x1, x2)|  (x1 ^ x2) ).collect();
+    let original: Vec<u8> = dawn.iter().zip(&key).map(|(x1, x2)|  (x1 ^ x2) ).collect();
+    println!("Encrypted dusk: {:?}", hex::encode(answer));
+    println!("Encrypted original: {:?}", hex::encode(original));
+
 }
 
 /*
